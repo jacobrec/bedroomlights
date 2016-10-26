@@ -17,6 +17,7 @@ validClients = []
 lightstate = False
 secret = ''.join(random.SystemRandom().choice(
         string.printable.replace(':', '')) for _ in range(100))
+password = open('password', 'r').read().strip()
 
 
 def veriToken(tok):
@@ -60,10 +61,15 @@ class AuthHandler(tornado.web.RequestHandler):
         self.set_header("Content-Type", "text/plain")
         passwd = self.json_args['passwd']
         print(self)
-        if(passwd == "petersucks69"):
+        if(passwd == password):
             self.write(getToken())
         else:
             self.write('invalid passwd')
+
+
+class PassHandle(tornado.web.RequestHandler):
+    def get(self):
+        self.write('petersucks69')
 
 
 class Handler(tornado.websocket.WebSocketHandler):
@@ -118,6 +124,7 @@ class StaticHandler(tornado.web.StaticFileHandler):
 
 
 application = tornado.web.Application([
+    (r"/password", PassHandle),
     (r"/auth", AuthHandler),
     (r"/websocket", Handler),
     (r"/(.*)", StaticHandler, {"path": os.getcwd()+"/www"}),
