@@ -6,10 +6,12 @@ ws.onmessage = function(evt) {
     if (data.type == "control") {
         $("#lightbut").val("controlled");
         if (data.lightstate == "1") {
-            $("#lightbut").text("Turn Off");
+            //$("#lightbut").text("Turn Off");
+            $("#lightbut").toggleClass('darken-4 lighten-2');
             lightOn = true;
         } else {
-            $("#lightbut").text("Turn On");
+            //$("#lightbut").text("Turn On");
+            $("#lightbut").toggleClass('lighten-2 darken-4');
             lightOn = false;
         }
     } else if (data.type == "tokenrejected") {

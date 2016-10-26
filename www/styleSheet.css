@@ -33,3 +33,12 @@
   align-items: center;
   justify-content: center;
 }
+
+#lightbut{
+  height: 130px;
+  width: 130px;
+}
+#lightbut i{
+  line-height: 130px;
+  font-size: 100px;
+}
