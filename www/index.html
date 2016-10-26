@@ -5,12 +5,23 @@
     <title>Lights</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.7/js/materialize.min.js"></script>
     <script src="lights.js"></script>
     <link rel="stylesheet" href="styleSheet.css">
 </head>
 
 <body>
-    <input id="lightbut" type="button" value="Loading" disabled="true">
+    <input id="lightbut" type="button" class="btn-large waves-effect waves-light" value="Loading" disabled="true">
+    <div id="passwdbox" class="modal">
+        <div class="modal-content">
+            <h4>Enter your password here</h4>
+            <input id="pass" type="password" class="">
+        </div>
+        <div class="modal-footer">
+            <a href="#!" id="sub" class=" modal-action modal-close waves-effect waves-green btn-flat">Submit</a>
+        </div>
+    </div>
 </body>
 
 </html>
