@@ -6,36 +6,25 @@ ws.onmessage = function(evt) {
     if (data.type == "control") {
         $("#lightbut").val("controlled");
         if (data.lightstate == "1") {
-            $("#lightbut").val("Turn Off");
+            $("#lightbut").text("Turn Off");
             lightOn = true;
         } else {
-            $("#lightbut").val("Turn On");
+            $("#lightbut").text("Turn On");
             lightOn = false;
         }
-    } else if (data.type == "validate") {
-
+    } else if (data.type == "tokenrejected") {
+        localStorage.clear();
+        $("#passwdbox").show();
+        $("#lightbox").hide();
     } else {
-
+        console.error(evt.data);
     }
 
 };
 
 
 $(document).ready(function() {
-    $('#passwdbox').leanModal({
-        dismissible: true, // Modal can be dismissed by clicking outside of the modal
-        opacity: 1, // Opacity of modal background
-        in_duration: 300, // Transition in duration
-        out_duration: 200, // Transition out duration
-        starting_top: '4%', // Starting top style attribute
-        ending_top: '10%', // Ending top style attribute
-        ready: function() {
-            alert('Ready');
-        }, // Callback for Modal open
-        complete: function() {
-                alert('Closed');
-            } // Callback for Modal close
-    });
+
     $("#sub").click(function() {
         if ($("#passwd").val() != "") {
             $.ajax({
@@ -47,15 +36,23 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
                     localStorage.setItem('tok', data);
-                    $("#lightbut").prop('disabled', false);
+                    $("#passwdbox").hide();
+                    $("#lightbox").show();
                 },
                 contentType: "application/json"
             });
+            $("#passwd").val("");
         }
 
     });
+    $("#signout").click(function() {
+        localStorage.clear();
+        $("#passwdbox").show();
+        $("#lightbox").hide();
+    });
 
     $("#lightbut").click(function() {
+        console.log("Flip");
         if (lightOn) {
             ws.send(JSON.stringify({
                 "type": "off",
@@ -69,7 +66,11 @@ $(document).ready(function() {
         }
     });
 
-    if(localStorage.getItem("tok") == null){
-        $("#passwdbox").openModal();
+    if (localStorage.getItem("tok") == null) {
+        $("#passwdbox").show();
+        $("#lightbox").hide();
+    } else {
+        $("#passwdbox").hide();
+        $("#lightbox").show();
     }
 });

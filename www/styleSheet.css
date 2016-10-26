@@ -1,0 +1,35 @@
+.hor {
+    display: flex;
+    flex-direction: row;
+}
+.ver {
+    display: flex;
+    flex-direction: column;
+}
+.top {
+    justify-content: flex-start!important;
+}
+.bottom {
+    justify-content: flex-end!important;
+}
+.tall {
+    height: 100%;
+}
+.wide {
+    width: 100%;
+}
+.cent {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+}
+.spread {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.squish{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

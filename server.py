@@ -15,7 +15,8 @@ clients = []
 validClients = []
 
 lightstate = False
-secret = "sxtydgsvfhandgosbadfihsvfinbjdsajofnvojboasvbfsgdfoasjdsbobojfbvosbo"
+secret = ''.join(random.SystemRandom().choice(
+        string.printable.replace(':', '')) for _ in range(100))
 
 
 def veriToken(tok):
@@ -77,6 +78,7 @@ class Handler(tornado.websocket.WebSocketHandler):
                            )
 
     def on_message(self, data):
+        print(data)
         message = json.loads(data)
         print(message)
         if isValidated(self, message["tok"]):
@@ -84,8 +86,8 @@ class Handler(tornado.websocket.WebSocketHandler):
                 turnOn()
             elif message["type"] == "off":
                 turnOff()
-        elif message["type"] == "validate":
-            print(message)
+        else:
+            self.write_message('{"type":"tokenrejected"}')
 
     def on_close(self):
         print("a client left")

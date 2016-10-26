@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html class="tall">
 
 <head>
     <title>Lights</title>
@@ -11,16 +11,25 @@
     <link rel="stylesheet" href="styleSheet.css">
 </head>
 
-<body>
-    <input id="lightbut" type="button" class="btn-large waves-effect waves-light" value="Loading" disabled="true">
-    <div id="passwdbox" class="modal">
-        <div class="modal-content">
-            <h4>Enter your password here</h4>
-            <input id="pass" type="password" class="">
+<body class="tall">
+    <div id="lightbox" class="ver tall wide spread">
+      <p>
+        Made by Jacob
+      </p>
+        <button id="lightbut" class="btn waves-effect waves-light">Loading</button>
+        <button id="signout" class="btn waves-effect waves-light">Sign out</button>
+    </div>
+    <div id="passwdbox" class="ver wide tall squish">
+        <h3>Welcome to my lights</h3>
+        <p>
+            Please verify your identity
+        </p>
+        <div class="input-field col s6">
+            <input id="passwd" type="password" class="validate">
+            <label for="passwd">Password</label>
         </div>
-        <div class="modal-footer">
-            <a href="#!" id="sub" class=" modal-action modal-close waves-effect waves-green btn-flat">Submit</a>
-        </div>
+
+        <button id="sub" type="button" class="btn waves-effect waves-light">Sign in</button>
     </div>
 </body>
 
