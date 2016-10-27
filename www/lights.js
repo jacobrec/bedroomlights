@@ -1,17 +1,21 @@
 var ws = new WebSocket("ws://" + window.location.host + "/websocket");
 lightOn = false;
 
+var light = 'lighten-3';
+var dark = 'darken-4';
+
+
 ws.onmessage = function(evt) {
     var data = JSON.parse(evt.data);
     if (data.type == "control") {
         $("#lightbut").val("controlled");
         if (data.lightstate == "1") {
             //$("#lightbut").text("Turn Off");
-            $("#lightbut").toggleClass('darken-4 lighten-2');
+            $("#lightbut").toggleClass(dark + ' ' + light);
             lightOn = true;
         } else {
             //$("#lightbut").text("Turn On");
-            $("#lightbut").toggleClass('lighten-2 darken-4');
+            $("#lightbut").toggleClass(light + ' ' + dark);
             lightOn = false;
         }
     } else if (data.type == "tokenrejected") {
@@ -26,16 +30,16 @@ ws.onmessage = function(evt) {
 
 
 $(document).ready(function() {
-  $.ajax({
-      url: "http://api.forismatic.com/api/1.0/?",
-      dataType: "jsonp",
-      data: "method=getQuote&format=jsonp&lang=en&jsonp=?",
-      success: function( response ) {
-        $("#quotebox").html("<p id='random_quote' class='lead text-center'>" +
-          response.quoteText + "<br/>&dash; " + response.quoteAuthor + " &dash;</p>");
+    $.ajax({
+        url: "http://api.forismatic.com/api/1.0/?",
+        dataType: "jsonp",
+        data: "method=getQuote&format=jsonp&lang=en&jsonp=?",
+        success: function(response) {
+            $("#quotebox").html("<p id='random_quote' class='flow-text lead text-center'>" +
+                response.quoteText + "<br/>&dash; " + response.quoteAuthor + "</p>");
 
-      }
-  });
+        }
+    });
 
     $("#sub").click(function() {
         if ($("#passwd").val() != "") {
