@@ -10,11 +10,9 @@ ws.onmessage = function(evt) {
     if (data.type == "control") {
         $("#lightbut").val("controlled");
         if (data.lightstate == "1") {
-            //$("#lightbut").text("Turn Off");
             $("#lightbut").toggleClass(dark + ' ' + light);
             lightOn = true;
         } else {
-            //$("#lightbut").text("Turn On");
             $("#lightbut").toggleClass(light + ' ' + dark);
             lightOn = false;
         }
@@ -25,7 +23,6 @@ ws.onmessage = function(evt) {
     } else {
         console.error(evt.data);
     }
-
 };
 
 
@@ -37,7 +34,6 @@ $(document).ready(function() {
         success: function(response) {
             $("#quotebox").html("<p id='random_quote' class='flow-text lead text-center'>" +
                 response.quoteText + "<br/>&dash; " + response.quoteAuthor + "</p>");
-
         }
     });
 
