@@ -53,7 +53,7 @@ def isValidated(client, tok):
 class AuthHandler(tornado.web.RequestHandler):
     def prepare(self):
         if self.request.headers["Content-Type"].startswith("application/json"):
-            self.json_args = json.loads(self.request.body)
+            self.json_args = json.loads(self.request.body.decode('ascii'))
         else:
             self.json_args = None
 
@@ -104,7 +104,6 @@ class Handler(tornado.websocket.WebSocketHandler):
             elif message["type"] == "fan_high":
                 for client in clients:
                     client.write_message('{"fanstate":"3","type":"fan"}')
-
         else:
             self.write_message('{"type":"tokenrejected"}')
 
