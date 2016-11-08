@@ -92,6 +92,19 @@ class Handler(tornado.websocket.WebSocketHandler):
                 turnOn()
             elif message["type"] == "off":
                 turnOff()
+            elif message["type"] == "fan_off":
+                for client in clients:
+                    client.write_message('{"fanstate":"0","type":"fan"}')
+            elif message["type"] == "fan_low":
+                for client in clients:
+                    client.write_message('{"fanstate":"1","type":"fan"}')
+            elif message["type"] == "fan_mid":
+                for client in clients:
+                    client.write_message('{"fanstate":"2","type":"fan"}')
+            elif message["type"] == "fan_high":
+                for client in clients:
+                    client.write_message('{"fanstate":"3","type":"fan"}')
+
         else:
             self.write_message('{"type":"tokenrejected"}')
 

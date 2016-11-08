@@ -18,6 +18,22 @@ ws.onmessage = function(evt) {
             $("#lightbut").addClass(dark);
             lightOn = false;
         }
+    } else if (data.type == "fan") {
+        $(".fanbut").removeClass('teal');
+        switch (parseInt(data.fanstate)) {
+            case 1:
+                $("#fan_low").addClass('teal');
+                break;
+            case 2:
+                $("#fan_mid").addClass('teal');
+                break;
+            case 3:
+                $("#fan_high").addClass('teal');
+                break;
+            default:
+                $("#fan_off").addClass('teal');
+
+        }
     } else if (data.type == "tokenrejected") {
         localStorage.clear();
         $("#passwdbox").show();
@@ -59,6 +75,14 @@ $(document).ready(function() {
         }
 
     });
+
+    $(".fanbut").click(function() {
+        ws.send(JSON.stringify({
+            "type": $(this).attr('id'),
+            "tok": localStorage.getItem('tok')
+        }));
+    });
+
     $("#signout").click(function() {
         localStorage.clear();
         $("#passwdbox").show();
