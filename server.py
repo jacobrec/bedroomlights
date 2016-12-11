@@ -130,7 +130,6 @@ class Handler(tornado.websocket.WebSocketHandler):
                 GPIO.output(fan_high, GPIO.HIGH)
                 for client in clients:
                     client.write_message('{"fanstate":"3","type":"fan"}')
-
         else:
             self.write_message('{"type":"tokenrejected"}')
 
