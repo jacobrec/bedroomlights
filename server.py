@@ -11,14 +11,27 @@ import random
 import string
 import sys
 
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BCM)
+
+light = 23
+fan_low = 27
+fan_mid = 17
+fan_high = 22
+
 clients = []
 validClients = []
 
 lightstate = False
 secret = ''.join(random.SystemRandom().choice(
         string.printable.replace(':', '')) for _ in range(100))
-password = open('password', 'r').read().strip()
+password = open(r"password.txt", encoding="utf-8").read().strip()
 
+GPIO.setup(23, GPIO.OUT)
+GPIO.setup(17, GPIO.OUT)
+GPIO.setup(27, GPIO.OUT)
+GPIO.setup(22, GPIO.OUT)
 
 def veriToken(tok):
     a = tok.split(':')
@@ -53,6 +66,7 @@ def isValidated(client, tok):
 class AuthHandler(tornado.web.RequestHandler):
     def prepare(self):
         if self.request.headers["Content-Type"].startswith("application/json"):
+            print(self.request.body.decode('ascii'))
             self.json_args = json.loads(self.request.body.decode('ascii'))
         else:
             self.json_args = None
@@ -93,15 +107,27 @@ class Handler(tornado.websocket.WebSocketHandler):
             elif message["type"] == "off":
                 turnOff()
             elif message["type"] == "fan_off":
+                GPIO.output(fan_low, GPIO.LOW)
+                GPIO.output(fan_mid, GPIO.LOW)
+                GPIO.output(fan_high, GPIO.LOW)
                 for client in clients:
                     client.write_message('{"fanstate":"0","type":"fan"}')
             elif message["type"] == "fan_low":
+                GPIO.output(fan_low, GPIO.HIGH)
+                GPIO.output(fan_mid, GPIO.HIGH)
+                GPIO.output(fan_high, GPIO.LOW)
                 for client in clients:
                     client.write_message('{"fanstate":"1","type":"fan"}')
             elif message["type"] == "fan_mid":
+                GPIO.output(fan_low, GPIO.LOW)
+                GPIO.output(fan_mid, GPIO.HIGH)
+                GPIO.output(fan_high, GPIO.LOW)
                 for client in clients:
                     client.write_message('{"fanstate":"2","type":"fan"}')
             elif message["type"] == "fan_high":
+                GPIO.output(fan_low, GPIO.LOW)
+                GPIO.output(fan_mid, GPIO.LOW)
+                GPIO.output(fan_high, GPIO.HIGH)
                 for client in clients:
                     client.write_message('{"fanstate":"3","type":"fan"}')
             elif message["type"] == "check":
@@ -118,6 +144,7 @@ class Handler(tornado.websocket.WebSocketHandler):
 
 
 def turnOff():
+    GPIO.output(light, GPIO.HIGH)
     lightstate = False
     print("Off")
     for client in clients:
@@ -125,6 +152,7 @@ def turnOff():
 
 
 def turnOn():
+    GPIO.output(light, GPIO.LOW)
     lightstate = True
     print("On")
     for client in clients:
