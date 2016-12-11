@@ -4,14 +4,15 @@ lightOn = false;
 var light = 'lighten-3';
 var dark = 'darken-4';
 
-ws.onopen = function (event) {
-  ws.send(JSON.stringify({
-      "type": 'check',
-      "tok": localStorage.getItem('tok')
-  }));
+ws.onopen = function(event) {
+    ws.send(JSON.stringify({
+        "type": 'check',
+        "tok": localStorage.getItem('tok')
+    }));
 };
 ws.onmessage = function(evt) {
     var data = JSON.parse(evt.data);
+    console.log(evt.data);
     if (data.type == "control") {
         doLights(data.lightstate);
     } else if (data.type == "fan") {
@@ -34,25 +35,27 @@ ws.onmessage = function(evt) {
         localStorage.clear();
         $("#passwdbox").show();
         $("#lightbox").hide();
-    } else if(data.type == "validated"){
-      $("#passwdbox").hide();
-      $("#lightbox").show();
+    } else if (data.type == "valid") {
+      console.log("Yup, youre in!");
+        $("#passwdbox").hide();
+        $("#lightbox").show();
         doLights(data.lightstate);
-    }else{
-      console.error(evt.data);
+    } else {
+        console.error(evt.data);
     }
 };
-function doLights(lightstate){
-  $("#lightbut").val("controlled");
-  if (lightstate == "1") {
-      $("#lightbut").removeClass(dark);
-      $("#lightbut").addClass(light);
-      lightOn = true;
-  } else {
-      $("#lightbut").removeClass(light);
-      $("#lightbut").addClass(dark);
-      lightOn = false;
-  }
+
+function doLights(lightstate) {
+    $("#lightbut").val("controlled");
+    if (lightstate == "1") {
+        $("#lightbut").removeClass(dark);
+        $("#lightbut").addClass(light);
+        lightOn = true;
+    } else {
+        $("#lightbut").removeClass(light);
+        $("#lightbut").addClass(dark);
+        lightOn = false;
+    }
 }
 
 $(document).ready(function() {
@@ -100,6 +103,10 @@ $(document).ready(function() {
         localStorage.clear();
         $("#passwdbox").show();
         $("#lightbox").hide();
+        ws.send(JSON.stringify({
+            "type": 'signout',
+            "tok": localStorage.getItem('tok')
+        }));
     });
 
     $("#lightbut").click(function() {

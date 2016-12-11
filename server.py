@@ -11,10 +11,14 @@ import random
 import string
 import sys
 
-import RPi.GPIO as GPIO
+import importlib.util
+try:
+    importlib.util.find_spec('RPi.GPIO')
+    import RPi.GPIO as GPIO
+except ImportError:
+        import FakeRPi.GPIO as GPIO
 
 GPIO.setmode(GPIO.BCM)
-
 light = 23
 fan_low = 27
 fan_mid = 17
@@ -24,36 +28,39 @@ clients = []
 validClients = []
 
 lightstate = False
-secret = ''.join(random.SystemRandom().choice(
-        string.printable.replace(':', '')) for _ in range(100))
 password = open(r"password.txt", encoding="utf-8").read().strip()
+secret = ''
+def init():
 
-GPIO.setup(23, GPIO.OUT)
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(27, GPIO.OUT)
-GPIO.setup(22, GPIO.OUT)
+    secret = getRandomString(100)
+
+    GPIO.setup(23, GPIO.OUT)
+    GPIO.setup(17, GPIO.OUT)
+    GPIO.setup(27, GPIO.OUT)
+    GPIO.setup(22, GPIO.OUT)
+
 
 def veriToken(tok):
-    a = tok.split(':')
+    a = tok.split('a')
     hashstr = a[0]
     tkstr = a[1]
-    return hashlib.sha512((tkstr+secret).encode('UTF8')).hexdigest() == hashstr
+    return hashlib.sha512((tkstr+secret).encode('UTF8')
+                          ).hexdigest().replace('a', 'b') == hashstr
 
 
 def getToken():
     s = getRandomString(30)
-    return hashlib.sha512((s+secret).encode('UTF8')).hexdigest()+':'+s
+    return hashlib.sha512((s+secret).encode('UTF8')
+                          ).hexdigest().replace('a', 'b')+'a'+s
 
 
 def getRandomString(length):
     return (''.join(random.SystemRandom().choice(
-            string.printable.replace(':', '')) for _ in range(length))
-            )
+            string.ascii_lowercase.replace('a', '') + string.digits
+            ) for _ in range(length)))
 
 
 def isValidated(client, tok):
-    if client in validClients:
-        return True
     try:
         if veriToken(tok):
             validClients.append(client)
@@ -74,7 +81,7 @@ class AuthHandler(tornado.web.RequestHandler):
     def post(self):
         self.set_header("Content-Type", "text/plain")
         passwd = self.json_args['passwd']
-        print(self)
+        print(passwd+" : "+password)
         if(passwd == password):
             self.write(getToken())
         else:
@@ -98,43 +105,48 @@ class Handler(tornado.websocket.WebSocketHandler):
                            )
 
     def on_message(self, data):
-        print(data)
-        message = json.loads(data)
-        print(message)
-        if isValidated(self, message["tok"]):
-            if message["type"] == "on":
-                turnOn()
-            elif message["type"] == "off":
-                turnOff()
-            elif message["type"] == "fan_off":
-                GPIO.output(fan_low, GPIO.LOW)
-                GPIO.output(fan_mid, GPIO.LOW)
-                GPIO.output(fan_high, GPIO.LOW)
-                for client in clients:
-                    client.write_message('{"fanstate":"0","type":"fan"}')
-            elif message["type"] == "fan_low":
-                GPIO.output(fan_low, GPIO.HIGH)
-                GPIO.output(fan_mid, GPIO.HIGH)
-                GPIO.output(fan_high, GPIO.LOW)
-                for client in clients:
-                    client.write_message('{"fanstate":"1","type":"fan"}')
-            elif message["type"] == "fan_mid":
-                GPIO.output(fan_low, GPIO.LOW)
-                GPIO.output(fan_mid, GPIO.HIGH)
-                GPIO.output(fan_high, GPIO.LOW)
-                for client in clients:
-                    client.write_message('{"fanstate":"2","type":"fan"}')
-            elif message["type"] == "fan_high":
-                GPIO.output(fan_low, GPIO.LOW)
-                GPIO.output(fan_mid, GPIO.LOW)
-                GPIO.output(fan_high, GPIO.HIGH)
-                for client in clients:
-                    client.write_message('{"fanstate":"3","type":"fan"}')
-            elif message["type"] == "check":
-                    client.write_message('{"lightstate":"' + "0" if lightstate
-                else "1" + '","type":"validated"}')
-        else:
-            self.write_message('{"type":"tokenrejected"}')
+        try:
+            print(data)
+            message = json.loads(data)
+            print(message)
+            if isValidated(self, message["tok"]):
+                if message["type"] == "on":
+                    turnOn()
+                elif message["type"] == "off":
+                    turnOff()
+                elif message["type"] == "fan_off":
+                    GPIO.output(fan_low, GPIO.LOW)
+                    GPIO.output(fan_mid, GPIO.LOW)
+                    GPIO.output(fan_high, GPIO.LOW)
+                    for client in clients:
+                        client.write_message('{"fanstate":"0","type":"fan"}')
+                elif message["type"] == "fan_low":
+                    GPIO.output(fan_low, GPIO.HIGH)
+                    GPIO.output(fan_mid, GPIO.HIGH)
+                    GPIO.output(fan_high, GPIO.LOW)
+                    for client in clients:
+                        client.write_message('{"fanstate":"1","type":"fan"}')
+                elif message["type"] == "fan_mid":
+                    GPIO.output(fan_low, GPIO.LOW)
+                    GPIO.output(fan_mid, GPIO.HIGH)
+                    GPIO.output(fan_high, GPIO.LOW)
+                    for client in clients:
+                        client.write_message('{"fanstate":"2","type":"fan"}')
+                elif message["type"] == "fan_high":
+                    GPIO.output(fan_low, GPIO.LOW)
+                    GPIO.output(fan_mid, GPIO.LOW)
+                    GPIO.output(fan_high, GPIO.HIGH)
+                    for client in clients:
+                        client.write_message('{"fanstate":"3","type":"fan"}')
+                elif message["type"] == "check":
+                    self.write_message('{"lightstate":"' + ('0' if lightstate
+                                       else '0') + '","type":"valid"}')
+                elif message["type"] == "signout":
+                    validClients.remove(self)
+            else:
+                self.write_message('{"type":"tokenrejected"}')
+        except Exception:
+            print("an error has occured")
 
     def on_close(self):
         print("a client left")
@@ -165,7 +177,7 @@ class StaticHandler(tornado.web.StaticFileHandler):
             url_path = url_path + 'index.html'
         return url_path
 
-
+init()
 application = tornado.web.Application([
     (r"/password", PassHandle),
     (r"/auth", AuthHandler),
