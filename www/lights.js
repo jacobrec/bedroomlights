@@ -4,20 +4,16 @@ lightOn = false;
 var light = 'lighten-3';
 var dark = 'darken-4';
 
-
+ws.onopen = function (event) {
+  ws.send(JSON.stringify({
+      "type": 'check',
+      "tok": localStorage.getItem('tok')
+  }));
+};
 ws.onmessage = function(evt) {
     var data = JSON.parse(evt.data);
     if (data.type == "control") {
-        $("#lightbut").val("controlled");
-        if (data.lightstate == "1") {
-            $("#lightbut").removeClass(dark);
-            $("#lightbut").addClass(light);
-            lightOn = true;
-        } else {
-            $("#lightbut").removeClass(light);
-            $("#lightbut").addClass(dark);
-            lightOn = false;
-        }
+        doLights(data.lightstate);
     } else if (data.type == "fan") {
         $(".fanbut").removeClass('teal');
         switch (parseInt(data.fanstate)) {
@@ -38,11 +34,26 @@ ws.onmessage = function(evt) {
         localStorage.clear();
         $("#passwdbox").show();
         $("#lightbox").hide();
-    } else {
-        console.error(evt.data);
+    } else if(data.type == "validated"){
+      $("#passwdbox").hide();
+      $("#lightbox").show();
+        doLights(data.lightstate);
+    }else{
+      console.error(evt.data);
     }
 };
-
+function doLights(lightstate){
+  $("#lightbut").val("controlled");
+  if (lightstate == "1") {
+      $("#lightbut").removeClass(dark);
+      $("#lightbut").addClass(light);
+      lightOn = true;
+  } else {
+      $("#lightbut").removeClass(light);
+      $("#lightbut").addClass(dark);
+      lightOn = false;
+  }
+}
 
 $(document).ready(function() {
     $.ajax({
@@ -66,8 +77,10 @@ $(document).ready(function() {
                 success: function(data) {
                     console.log(data);
                     localStorage.setItem('tok', data);
-                    $("#passwdbox").hide();
-                    $("#lightbox").show();
+                    ws.send(JSON.stringify({
+                        "type": 'check',
+                        "tok": localStorage.getItem('tok')
+                    }));
                 },
                 contentType: "application/json"
             });

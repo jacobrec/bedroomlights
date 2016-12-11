@@ -104,6 +104,9 @@ class Handler(tornado.websocket.WebSocketHandler):
             elif message["type"] == "fan_high":
                 for client in clients:
                     client.write_message('{"fanstate":"3","type":"fan"}')
+            elif message["type"] == "check":
+                    client.write_message('{"lightstate":"' + "0" if lightstate
+                else "1" + '","type":"validated"}')
         else:
             self.write_message('{"type":"tokenrejected"}')
 
